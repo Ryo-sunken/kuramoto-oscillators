@@ -1,4 +1,6 @@
 use serde::{Deserialize, Serialize};
+use serde_json::error::Error;
+use std::fs;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CommonParam {
@@ -6,6 +8,12 @@ pub struct CommonParam {
     pub simulation_time: f64,
     pub random_range: f64,
     pub random_seeds: Vec<u64>,
+}
+
+impl CommonParam {
+    pub fn load() -> Result<Self, Error> {
+        serde_json::from_str(&fs::read_to_string("data/common.json").unwrap())
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -18,6 +26,12 @@ pub struct NetworkParam {
     pub connectivity: Vec<Vec<f64>>,
 }
 
+impl NetworkParam {
+    pub fn load(path: &str) -> Result<Self, Error> {
+        serde_json::from_str(&fs::read_to_string(path).unwrap())
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ControlParam {
     comment: String,
@@ -25,4 +39,10 @@ pub struct ControlParam {
     pub input_weight: Vec<f64>,
     pub input_frequency: Vec<f64>,
     pub average_weight: Vec<Vec<f64>>,
+}
+
+impl ControlParam {
+    pub fn load(path: &str) -> Result<Self, Error> {
+        serde_json::from_str(&fs::read_to_string(path).unwrap())
+    }
 }
