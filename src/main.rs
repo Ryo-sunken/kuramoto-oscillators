@@ -11,7 +11,7 @@ use std::fs::File;
 use std::path::Path;
 use std::{fs, io};
 
-const DIR_NAME: &str = "toy1";
+const DIR_NAME: &str = "toy2";
 const IS_GEN_PARAM: bool = false;
 
 struct KuramotoOscillators {
@@ -126,22 +126,6 @@ fn read_dir<P: AsRef<Path>>(path: P) -> io::Result<Vec<String>> {
         .collect())
 }
 
-fn load_common_param() -> Result<CommonParam, Error> {
-    serde_json::from_str(&fs::read_to_string("data/common.json").unwrap())
-}
-
-fn load_network_param(name: &str) -> Result<NetworkParam, Error> {
-    serde_json::from_str(
-        &fs::read_to_string(format!("data/{}/param/network/{}", DIR_NAME, name)).unwrap(),
-    )
-}
-
-fn load_control_param(name: &str) -> Result<ControlParam, Error> {
-    serde_json::from_str(
-        &fs::read_to_string(format!("data/{}/param/control/{}", DIR_NAME, name)).unwrap(),
-    )
-}
-
 fn initialize(n: usize, random_range: f64, seed: u64) -> Matrix<f64> {
     let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(seed);
     //Matrix::one(n, 1)
@@ -157,7 +141,7 @@ fn main() {
     }
 
     // 共通パラメータの読み込み
-    let common_param = load_common_param().unwrap();
+    let common_param = CommonParam::from_path("data/common.json");
 
     // パラメータファイル一覧の取得
     let network_param_names = read_dir(format!("data/{}/param/network", DIR_NAME)).unwrap();
@@ -180,8 +164,8 @@ fn main() {
             let _ = fs::create_dir(&dir_path);
 
             // パラメータの読み込み
-            let network_param = load_network_param(network).unwrap();
-            let control_param = load_control_param(control).unwrap();
+            let network_param = NetworkParam::from_path(&format!("data/{}/param/network/{}", DIR_NAME, network));
+            let control_param = ControlParam::from_path(&format!("data/{}/param/control/{}", DIR_NAME, control));
             let kuramoto_osc = KuramotoOscillators::new(&network_param, &control_param);
 
             for seed in &common_param.random_seeds {
