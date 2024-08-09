@@ -3,14 +3,14 @@ mod parameter;
 mod kuramoto_oscillators;
 
 use matrix::Matrix;
-use ode_solver::{EulerSolver, RungeKuttaSolver};
-use parameter::{CommonParam, ControlParam, NetworkParam};
 use rand_chacha::rand_core::SeedableRng;
+use ode_solver::{EulerSolver, RungeKuttaSolver};
+use parameter::{CommonParam, NetworkParam, ControlParam};
 use std::path::Path;
 use std::{fs, io};
 use crate::kuramoto_oscillators::KuramotoOscillators;
 
-const DIR_NAME: &str = "toy2";
+const DIR_NAME: &str = "toy1";
 const IS_GEN_PARAM: bool = false;
 
 fn get_file_stem(name: &str) -> &str {
@@ -46,7 +46,7 @@ fn main() {
     }
 
     // 共通パラメータの読み込み
-    let common_param = load_common_param().unwrap();
+    let common_param = CommonParam::from_path("data/common.json").unwrap();
 
     // パラメータファイル一覧の取得
     let network_param_names = read_dir(format!("data/{}/param/network", DIR_NAME)).unwrap();
@@ -69,8 +69,8 @@ fn main() {
             let _ = fs::create_dir(&dir_path);
 
             // パラメータの読み込み
-            let network_param = load_network_param(network).unwrap();
-            let control_param = load_control_param(control).unwrap();
+            let network_param = NetworkParam::from_path(&format!("data/{}/param/network/{}", DIR_NAME, network)).unwrap();
+            let control_param = ControlParam::from_path(&format!("data/{}/param/control/{}", DIR_NAME, control)).unwrap();
             let kuramoto_osc = KuramotoOscillators::new(&network_param, &control_param);
 
             for seed in &common_param.random_seeds {
