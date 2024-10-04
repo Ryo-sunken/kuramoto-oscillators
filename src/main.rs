@@ -1,16 +1,16 @@
+mod kuramoto_oscillators;
 mod param_generator;
 mod parameter;
-mod kuramoto_oscillators;
 
+use crate::kuramoto_oscillators::KuramotoOscillators;
 use matrix::Matrix;
-use rand_chacha::rand_core::SeedableRng;
 use ode_solver::{EulerSolver, RungeKuttaSolver};
-use parameter::{CommonParam, NetworkParam, ControlParam};
+use parameter::{CommonParam, ControlParam, NetworkParam};
+use rand_chacha::rand_core::SeedableRng;
 use std::path::Path;
 use std::{fs, io};
-use crate::kuramoto_oscillators::KuramotoOscillators;
 
-const DIR_NAME: &str = "toy1";
+const DIR_NAME: &str = "report1";
 const IS_GEN_PARAM: bool = false;
 
 fn get_file_stem(name: &str) -> &str {
@@ -33,7 +33,6 @@ fn read_dir<P: AsRef<Path>>(path: P) -> io::Result<Vec<String>> {
 
 fn initialize(n: usize, random_range: f64, seed: u64) -> Matrix<f64> {
     let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(seed);
-    //Matrix::one(n, 1)
     Matrix::randu(n, 1, &mut rng) * 2.0 * std::f64::consts::PI * random_range
 }
 
@@ -69,8 +68,10 @@ fn main() {
             let _ = fs::create_dir(&dir_path);
 
             // パラメータの読み込み
-            let network_param = NetworkParam::from_path(&format!("data/{}/param/network/{}", DIR_NAME, network)).unwrap();
-            let control_param = ControlParam::from_path(&format!("data/{}/param/control/{}", DIR_NAME, control)).unwrap();
+            let network_param =
+                NetworkParam::from_path(&format!("data/{}/param/network/{}", DIR_NAME, network));
+            let control_param =
+                ControlParam::from_path(&format!("data/{}/param/control/{}", DIR_NAME, control));
             let kuramoto_osc = KuramotoOscillators::new(&network_param, &control_param);
 
             for seed in &common_param.random_seeds {
@@ -86,7 +87,7 @@ fn main() {
 
                 RungeKuttaSolver::solve(
                     &kuramoto_osc,
-                    x,
+                    &x,
                     common_param.dt,
                     common_param.simulation_time,
                     &mut result_file,

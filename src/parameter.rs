@@ -1,6 +1,6 @@
-use std::fs;
 use serde::{Deserialize, Serialize};
 use serde_json::error::Error;
+use std::fs;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CommonParam {
@@ -27,8 +27,16 @@ pub struct NetworkParam {
 }
 
 impl NetworkParam {
-    pub fn from_path(path: &str) -> Result<Self, Error> {
-        serde_json::from_str(&fs::read_to_string(path).unwrap())
+    pub fn from_path(path: &str) -> Self {
+        let param: Self = serde_json::from_str(&fs::read_to_string(path).unwrap()).unwrap();
+        param.check();
+        param
+    }
+
+    fn check(&self) {
+        // freqとconnectivityのshape
+
+        // connectivityが非負で対称
     }
 }
 
@@ -42,7 +50,15 @@ pub struct ControlParam {
 }
 
 impl ControlParam {
-    pub fn from_path(path: &str) -> Result<Self, Error> {
-        serde_json::from_str(&fs::read_to_string(path).unwrap())
+    pub fn from_path(path: &str) -> Self {
+        let param: Self = serde_json::from_str(&fs::read_to_string(path).unwrap()).unwrap();
+        param.check();
+        param
+    }
+
+    fn check(&self) {
+        // freqとconnectivityのshape
+
+        // connectivityが非負で対称
     }
 }

@@ -80,7 +80,7 @@ checksum = "4ec2a862134d2a7d32d7983ddcdd1c4923530833c9f2ea1a44fc5fa473989058"
 [[package]]
 name = "matrix"
 version = "0.1.0"
-source = "git+https://github.com/Ryo-sunken/matrix-rs.git#2a796292e1d2bdb53fef6a67415638bdebf57a1f"
+source = "git+https://github.com/Ryo-sunken/matrix-rs.git#3c4809f29f15bfa3d56bdcbde415ce15207b2e61"
 dependencies = [
  "num-traits",
  "rand",
@@ -107,7 +107,7 @@ dependencies = [
 [[package]]
 name = "ode_solver"
 version = "0.1.0"
-source = "git+https://github.com/Ryo-sunken/ode-solver.git#6079d589cbf3dc82f1c6faa63ea51d6577c13862"
+source = "git+https://github.com/Ryo-sunken/ode-solver.git#0ee10bfe369459f043529a7d7df526d1aad37fd4"
 dependencies = [
  "csv",
  "matrix",

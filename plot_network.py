@@ -98,9 +98,9 @@ def plot_freq():
     ax[2].tick_params(labelsize=10)
 
 if __name__ == '__main__':
-    plt.rcParams['ps.useafm'] = True
-    plt.rcParams['pdf.use14corefonts'] = True
-    plt.rcParams['text.usetex'] = True
+    #plt.rcParams['ps.useafm'] = True
+    #plt.rcParams['pdf.use14corefonts'] = True
+    #plt.rcParams['text.usetex'] = True
 
     args         = parse_arguments()
     param        = load_param()
@@ -112,5 +112,5 @@ if __name__ == '__main__':
     if args.freq: 
         plot_freq()
         
-    plt.savefig('network_adjcency.pdf', backend='pgf')
+    #plt.savefig('network_adjcency.pdf', backend='pgf')
     plt.show()

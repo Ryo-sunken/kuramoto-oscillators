@@ -120,9 +120,9 @@ def create_fig():
     plt.tight_layout()
 
 if __name__ == '__main__':
-    plt.rcParams['ps.useafm'] = True
-    plt.rcParams['pdf.use14corefonts'] = True
-    plt.rcParams['text.usetex'] = True
+    #plt.rcParams['ps.useafm'] = True
+    #plt.rcParams['pdf.use14corefonts'] = True
+    #plt.rcParams['text.usetex'] = True
 
     args   = parse_arguments()
     param  = load_network_param()
