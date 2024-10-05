@@ -4,6 +4,7 @@ mod parameter;
 
 use crate::kuramoto_oscillators::KuramotoOscillators;
 use matrix::Matrix;
+use mpi::traits::*;
 use ode_solver::{EulerSolver, RungeKuttaSolver};
 use parameter::{CommonParam, ControlParam, NetworkParam};
 use rand_chacha::rand_core::SeedableRng;
@@ -37,7 +38,14 @@ fn initialize(n: usize, random_range: f64, seed: u64) -> Matrix<f64> {
 }
 
 fn main() {
-    println!("start");
+    let universe = mpi::initialize().unwrap();
+    let world = universe.world();
+    let size = world.size();
+    let rank = world.rank();
+
+    if rank == 0 {
+        println!("start");
+    }
 
     // パラメータの生成（オプション）
     if IS_GEN_PARAM {
@@ -59,7 +67,9 @@ fn main() {
             get_file_stem(network)
         ));
         for control in &control_param_names {
-            println!("{}, {}", network, control);
+            if rank == 0 {
+                println!("{}, {}", network, control);
+            }
 
             // 結果を保存するディレクトリの作成
             let network_name = get_file_stem(network);
@@ -74,29 +84,30 @@ fn main() {
                 ControlParam::from_path(&format!("data/{}/param/control/{}", DIR_NAME, control));
             let kuramoto_osc = KuramotoOscillators::new(&network_param, &control_param);
 
-            for seed in &common_param.random_seeds {
-                println!("{}", seed);
+            let seed = common_param.random_seeds[rank as usize];
+            println!("{}", seed);
 
-                // 初期値と結果を保存するファイル名
-                let x = initialize(network_param.state_dim, common_param.random_range, *seed);
-                let result_file_path = format!("{}/{}.csv", &dir_path, seed);
-                let mut result_file = csv::WriterBuilder::new()
-                    .delimiter(b' ')
-                    .from_path(&result_file_path)
-                    .unwrap();
+            // 初期値と結果を保存するファイル名
+            let x = initialize(network_param.state_dim, common_param.random_range, seed);
+            let result_file_path = format!("{}/{}.csv", &dir_path, seed);
+            let mut result_file = csv::WriterBuilder::new()
+                .delimiter(b' ')
+                .from_path(&result_file_path)
+                .unwrap();
 
-                RungeKuttaSolver::solve(
-                    &kuramoto_osc,
-                    &x,
-                    common_param.dt,
-                    common_param.simulation_time,
-                    &mut result_file,
-                );
-            }
+            RungeKuttaSolver::solve(
+                &kuramoto_osc,
+                &x,
+                common_param.dt,
+                common_param.simulation_time,
+                &mut result_file,
+            );
         }
     }
 
     // 結果画像の作成（Tikz）
 
-    println!("finish");
+    if rank == 0 {
+        println!("finish");
+    }
 }

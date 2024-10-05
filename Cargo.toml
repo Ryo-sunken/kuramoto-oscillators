@@ -11,8 +11,6 @@ serde_json = "1.0"
 csv = "1.3"
 rand = "0.8.5"
 rand_chacha = "*"
-matrix = { git = "https://github.com/Ryo-sunken/matrix-rs.git", feature = ["rayon"] }
-ode_solver = { git = "https://github.com/Ryo-sunken/ode-solver.git", feature = ["rayon"] }
-
-[profile.release]
-debug = true
+matrix = { git = "https://github.com/Ryo-sunken/matrix-rs.git" }
+ode_solver = { git = "https://github.com/Ryo-sunken/ode-solver.git" }
+mpi = { git = "https://github.com/rsmpi/rsmpi.git", branch = "main" }
