@@ -1,13 +1,13 @@
 use crate::parameter::{ControlParam, NetworkParam};
-use matrix::Matrix;
+use matrix::{sparse::SparseMatrix, Matrix};
 use ode_solver::{EulerSolver, RungeKuttaSolver};
 use std::f64::consts::PI;
 use std::fs::File;
 
 pub struct KuramotoOscillators {
-    inc: Matrix<f64>,
-    inc_wgt: Matrix<f64>,
-    input_wgt: Matrix<f64>,
+    inc_trans: SparseMatrix<f64>,
+    inc_wgt: SparseMatrix<f64>,
+    input_wgt: SparseMatrix<f64>,
     av_wgt: Matrix<f64>,
     omega: Matrix<f64>,
     input_omega: Matrix<f64>,
@@ -38,7 +38,9 @@ impl KuramotoOscillators {
                 }
             }
         }
-        let inc_wgt = &inc * &wgt;
+        let inc_wgt = (&inc * &wgt).to_sparse();
+        let inc_trans = inc.transpose().to_sparse();
+        let input_wgt = Matrix::<f64>::from_vec_col(control_param.input_weight.clone()).diag().to_sparse();
 
         let mut start = 0;
         for k in 0..network_param.cluster_nodes_num.len() {
@@ -52,9 +54,9 @@ impl KuramotoOscillators {
         }
 
         Self {
-            inc,
+            inc_trans,
             inc_wgt,
-            input_wgt: Matrix::<f64>::from_vec_col(control_param.input_weight.clone()).diag(),
+            input_wgt,
             av_wgt,
             omega: Matrix::<f64>::from_vec_col(network_param.frequency.clone()),
             input_omega: Matrix::<f64>::from_vec_col(control_param.input_frequency.clone()),
@@ -66,10 +68,10 @@ impl KuramotoOscillators {
 impl EulerSolver<f64, File> for KuramotoOscillators {
     fn dot_x(&self, x: &Matrix<f64>, t: f64) -> Matrix<f64> {
         if self.control_type == 0 {
-            &self.omega - &self.inc_wgt * (&self.inc.transpose() * x).sin()
+            &self.omega - &self.inc_wgt * (&self.inc_trans * x).sin()
                 + &self.input_wgt * (&self.av_wgt * x - x).sin()
         } else if self.control_type == 1 {
-            &self.omega - &self.inc_wgt * (&self.inc.transpose() * x).sin()
+            &self.omega - &self.inc_wgt * (&self.inc_trans * x).sin()
                 + &self.input_wgt * (&self.input_omega * t - x).sin()
         } else {
             x.clone()
@@ -84,10 +86,10 @@ impl EulerSolver<f64, File> for KuramotoOscillators {
 impl RungeKuttaSolver<f64, File> for KuramotoOscillators {
     fn dot_x(&self, x: &Matrix<f64>, t: f64) -> Matrix<f64> {
         if self.control_type == 0 {
-            &self.omega - &self.inc_wgt * (&self.inc.transpose() * x).sin()
+            &self.omega - &self.inc_wgt * (&self.inc_trans * x).sin()
                 + &self.input_wgt * (&self.av_wgt * x - x).sin()
         } else if self.control_type == 1 {
-            &self.omega - &self.inc_wgt * (&self.inc.transpose() * x).sin()
+            &self.omega - &self.inc_wgt * (&self.inc_trans * x).sin()
                 + &self.input_wgt * (&self.input_omega * t - x).sin()
         } else {
             x.clone()

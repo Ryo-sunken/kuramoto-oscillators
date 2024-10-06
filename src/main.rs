@@ -40,7 +40,6 @@ fn initialize(n: usize, random_range: f64, seed: u64) -> Matrix<f64> {
 fn main() {
     let universe = mpi::initialize().unwrap();
     let world = universe.world();
-    let size = world.size();
     let rank = world.rank();
 
     if rank == 0 {
