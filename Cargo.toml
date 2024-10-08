@@ -14,3 +14,7 @@ rand_chacha = "*"
 matrix = { git = "https://github.com/Ryo-sunken/matrix-rs.git" }
 ode_solver = { git = "https://github.com/Ryo-sunken/ode-solver.git" }
 mpi = { git = "https://github.com/rsmpi/rsmpi.git", branch = "main" }
+
+[features]
+default = [ "simulation" ]
+simulation = []

@@ -37,18 +37,13 @@ fn initialize(n: usize, random_range: f64, seed: u64) -> Matrix<f64> {
     Matrix::randu(n, 1, &mut rng) * 2.0 * std::f64::consts::PI * random_range
 }
 
-fn main() {
+fn simulation() {
     let universe = mpi::initialize().unwrap();
     let world = universe.world();
     let rank = world.rank();
 
     if rank == 0 {
         println!("start");
-    }
-
-    // パラメータの生成（オプション）
-    if IS_GEN_PARAM {
-        let _ = param_generator::create_param_dirs(DIR_NAME);
     }
 
     // 共通パラメータの読み込み
@@ -104,9 +99,23 @@ fn main() {
         }
     }
 
-    // 結果画像の作成（Tikz）
-
     if rank == 0 {
         println!("finish");
     }
+}
+
+fn main() {
+    
+    if cfg!(feature = "simulation") {
+        simulation();
+    }
+
+    /*
+    // パラメータの生成（オプション）
+    if IS_GEN_PARAM {
+        let _ = param_generator::create_param_dirs(DIR_NAME);
+    }
+
+    // 結果画像の作成（Tikz）
+    */
 }
