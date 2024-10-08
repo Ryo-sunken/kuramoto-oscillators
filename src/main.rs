@@ -3,16 +3,16 @@ mod param_generator;
 mod parameter;
 
 use crate::kuramoto_oscillators::KuramotoOscillators;
+use kuramoto_oscillators::DelayedKuramotoOscillators;
 use matrix::Matrix;
 use mpi::traits::*;
-use ode_solver::{EulerSolver, RungeKuttaSolver};
+use ode_solver::{DelayedEulerSolver, EulerSolver, RungeKuttaSolver};
 use parameter::{CommonParam, ControlParam, NetworkParam};
 use rand_chacha::rand_core::SeedableRng;
 use std::path::Path;
 use std::{fs, io};
 
 const DIR_NAME: &str = "report1";
-const IS_GEN_PARAM: bool = false;
 
 fn get_file_stem(name: &str) -> &str {
     let split_name: Vec<&str> = name.split('.').collect();
@@ -37,7 +37,7 @@ fn initialize(n: usize, random_range: f64, seed: u64) -> Matrix<f64> {
     Matrix::randu(n, 1, &mut rng) * 2.0 * std::f64::consts::PI * random_range
 }
 
-fn simulation() {
+fn main() {
     let universe = mpi::initialize().unwrap();
     let world = universe.world();
     let rank = world.rank();
@@ -99,23 +99,9 @@ fn simulation() {
         }
     }
 
+    // 結果画像の作成（Tikz）
+
     if rank == 0 {
         println!("finish");
     }
-}
-
-fn main() {
-    
-    if cfg!(feature = "simulation") {
-        simulation();
-    }
-
-    /*
-    // パラメータの生成（オプション）
-    if IS_GEN_PARAM {
-        let _ = param_generator::create_param_dirs(DIR_NAME);
-    }
-
-    // 結果画像の作成（Tikz）
-    */
 }

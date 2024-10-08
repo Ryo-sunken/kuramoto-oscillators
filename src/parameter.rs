@@ -50,7 +50,6 @@ impl NetworkParam {
                 }
             }
         }
-
     }
 }
 
@@ -77,7 +76,13 @@ impl ControlParam {
         assert_eq!(self.cluster_nodes_num.iter().sum::<usize>(), self.input_dim);
         assert_eq!(self.input_weight.len(), self.input_dim);
         assert_eq!(self.input_frequency.len(), self.input_dim);
-        assert_eq!(self.average_weight.iter().map(|arr| arr.iter().count()).collect::<Vec<_>>(), self.cluster_nodes_num);
+        assert_eq!(
+            self.average_weight
+                .iter()
+                .map(|arr| arr.iter().count())
+                .collect::<Vec<_>>(),
+            self.cluster_nodes_num
+        );
 
         // weightが非負
         assert!(self.input_weight.iter().all(|&x| x >= 0.));
