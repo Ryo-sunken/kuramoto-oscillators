@@ -349,7 +349,7 @@ dependencies = [
 [[package]]
 name = "ode_solver"
 version = "0.1.0"
-source = "git+https://github.com/Ryo-sunken/ode-solver.git#10b74a07d266c1f228ff01d6e8194c98f4a19513"
+source = "git+https://github.com/Ryo-sunken/ode-solver.git#af0609e961888b4d329ed9dca02bb6cb5c7fea2d"
 dependencies = [
  "csv",
  "matrix",

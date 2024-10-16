@@ -12,7 +12,12 @@ use rand_chacha::rand_core::SeedableRng;
 use std::path::Path;
 use std::{fs, io};
 
-const DIR_NAME: &str = "report1";
+const DIR_NAME: &str = "report6";
+
+fn main() {
+    normal_simulation();
+}
+
 
 fn get_file_stem(name: &str) -> &str {
     let split_name: Vec<&str> = name.split('.').collect();
@@ -37,7 +42,7 @@ fn initialize(n: usize, random_range: f64, seed: u64) -> Matrix<f64> {
     Matrix::randu(n, 1, &mut rng) * 2.0 * std::f64::consts::PI * random_range
 }
 
-fn main() {
+fn normal_simulation() {
     let universe = mpi::initialize().unwrap();
     let world = universe.world();
     let rank = world.rank();
@@ -99,7 +104,82 @@ fn main() {
         }
     }
 
-    // 結果画像の作成（Tikz）
+    if rank == 0 {
+        println!("finish");
+    }
+}
+
+fn delayed_simulation() {
+    let universe = mpi::initialize().unwrap();
+    let world = universe.world();
+    let rank = world.rank();
+
+    if rank == 0 {
+        println!("start");
+    }
+
+    // 共通パラメータの読み込み
+    let common_param = CommonParam::from_path("data/common.json").unwrap();
+
+    // パラメータファイル一覧の取得
+    let network_param_names = read_dir(format!("data/{}/param/network", DIR_NAME)).unwrap();
+    let control_param_names = read_dir(format!("data/{}/param/control", DIR_NAME)).unwrap();
+
+    // シミュレーションの実行
+    for network in &network_param_names {
+        let _ = fs::create_dir(format!(
+            "data/{}/result/{}",
+            DIR_NAME,
+            get_file_stem(network)
+        ));
+        for control in &control_param_names {
+            if rank == 0 {
+                println!("{}, {}", network, control);
+            }
+
+            let seed = common_param.random_seeds[rank as usize];
+            println!("{}", seed);
+
+            // 結果を保存するディレクトリの作成
+            let network_name = get_file_stem(network);
+            let control_name = get_file_stem(control);
+            let dir_path = format!(
+                "data/{}/result/{}/delayed_{}",
+                DIR_NAME, network_name, control_name
+            );
+            let _ = fs::create_dir(&dir_path);
+            let dir_path = format!(
+                "data/{}/result/{}/delayed_{}/{}",
+                DIR_NAME, network_name, control_name, seed,
+            );
+            let _ = fs::create_dir(&dir_path);
+
+            // パラメータの読み込み
+            let network_param =
+                NetworkParam::from_path(&format!("data/{}/param/network/{}", DIR_NAME, network));
+            let control_param =
+                ControlParam::from_path(&format!("data/{}/param/control/{}", DIR_NAME, control));
+
+            for delay_step in 1..101 {
+                // 初期値と結果を保存するファイル名
+                let mut kuramoto_osc = DelayedKuramotoOscillators::new(&network_param, &control_param, delay_step);
+                let x = initialize(network_param.state_dim, common_param.random_range, seed);
+                let result_file_path = format!("{}/{}.csv", &dir_path, delay_step);
+                let mut result_file = csv::WriterBuilder::new()
+                    .delimiter(b' ')
+                    .from_path(&result_file_path)
+                    .unwrap();
+
+                DelayedEulerSolver::solve(
+                    &mut kuramoto_osc,
+                    &x,
+                    common_param.dt,
+                    common_param.simulation_time,
+                    &mut result_file,
+                );
+            }
+        }
+    }
 
     if rank == 0 {
         println!("finish");

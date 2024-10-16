@@ -161,7 +161,6 @@ impl DelayedKuramotoOscillators {
         }
 
         let delay_buffer = Vec::with_capacity(delay_step);
-        println!("{} {}", delay_step, delay_buffer.len());
 
         Self {
             inc_trans,
@@ -202,8 +201,7 @@ impl DelayedEulerSolver<f64, File> for DelayedKuramotoOscillators {
     fn push_buffer(&mut self, x: &Matrix<f64>, k: usize) {
         if k < self.delay_step {
             self.delay_buffer.push(x.clone());
-        }
-        else {
+        } else {
             self.delay_buffer[k % self.delay_step] = x.clone();
         }
     }
