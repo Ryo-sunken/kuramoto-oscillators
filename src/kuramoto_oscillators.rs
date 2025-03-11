@@ -94,12 +94,13 @@ impl RungeKuttaSolver<f64, File> for KuramotoOscillators {
             &self.omega - &self.inc_wgt * (&self.inc_trans * x).sin()
                 + &self.input_wgt * (&self.input_omega * t - x).sin()
         } else {
-            x.clone()
+            Matrix::zero_like(x)
         }
     }
 
     fn post_process(&self, x: &Matrix<f64>) -> Matrix<f64> {
-        x.repeat(0., 2. * PI)
+        x.clone()
+        //x.repeat(0., 2. * PI)
     }
 }
 

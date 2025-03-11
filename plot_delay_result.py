@@ -32,7 +32,7 @@ def create_fig():
     fig.set_figheight(5)
     fsize = 22
     cmap = plt.get_cmap('tab10')
-    ax.set_xticks(np.arange(0.0, 1.1, 0.1))
+    ax.set_xticks(np.arange(0.0, 0.11, 0.01))
 
     plot_data = []
 
@@ -56,7 +56,7 @@ def create_fig():
         for k in range(len(param['cluster_nodes_num'])):
             data = []
             for i in range(idx_sum + 1, idx_sum + param['cluster_nodes_num'][k] + 1):
-                phase = np.array(result[result['time'] >= 80.0]['phase' + str(i)])
+                phase = np.array(result[result['time'] >= 40.0]['phase' + str(i)])
                 data.append(list(phase))
             data = np.array(data)
             order_data = np.sqrt(np.power(np.sum(np.cos(data), 0), 2) + np.power(np.sum(np.sin(data), 0), 2)) / param['cluster_nodes_num'][k]
@@ -65,7 +65,7 @@ def create_fig():
             idx_sum += param['cluster_nodes_num'][k]
         plot_data.append(min_order)
 
-    ax.plot(np.arange(0.0, 1.01, 0.01), plot_data, marker='o')
+    ax.plot(np.arange(0.0, 0.101, 0.001), plot_data, marker='o')
     ax.set_ylim(0.0, 1.0)
         
 

@@ -27,11 +27,23 @@ def main():
     a31 = a13.T
     a32 = a23.T
 
-    param['connectivity'] = np.block([[a11, a12, a13], [a21, a22, a23], [a31, a32, a33]]).tolist()
+    nominal_connectivity = param['connectivity']
+    nominal_frequency = param['frequency']
+    perturbated_connectivity = np.block([[a11, a12, a13], [a21, a22, a23], [a31, a32, a33]]).tolist()
+    perturbated_frequency = create_frequency()
+    param['connectivity'] = perturbated_connectivity
+    param['frequency'] = perturbated_frequency
 
-    param['frequency'] = create_frequency()
+    with open('data/report6/param/network/perturbated2.json', 'w', encoding='utf-8') as file:
+        json.dump(param, file, indent=4)
 
-    with open('data/report6/param/network/perturbated.json', 'w', encoding='utf-8') as file:
+    param['connectivity'] = nominal_connectivity
+    with open('data/report6/param/network/perturbated2_freq.json', 'w', encoding='utf-8') as file:
+        json.dump(param, file, indent=4)
+
+    param['connectivity'] = perturbated_connectivity
+    param['frequency'] = nominal_frequency
+    with open('data/report6/param/network/perturbated2_inter.json', 'w', encoding='utf-8') as file:
         json.dump(param, file, indent=4)
 
 def weighted_inter(cluster1, cluster2, min, r):

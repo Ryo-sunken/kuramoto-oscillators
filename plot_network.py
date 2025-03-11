@@ -78,8 +78,10 @@ def plot_network():
     cluster = np.array(param['cluster_nodes_num'])
     max_weight = np.max(connectivity)
     for e in edges:
-        if (10 <= e[0] and e[0] < 20) and (10 <= e[1] and e[1] < 20) and e[2] < 1.0 / max_weight:
+        if (10 <= e[0] and e[0] < 20) and (10 <= e[1] and e[1] < 20) and e[2] < 2.0 / max_weight:
             ax[0].plot([x[e[0]], x[e[1]]], [y[e[0]], y[e[1]]], color='k', linewidth=1, linestyle='dashed', zorder=1)
+        elif (e[0] // 10 != e[1] // 10):
+            ax[0].plot([x[e[0]], x[e[1]]], [y[e[0]], y[e[1]]], color='k', linewidth=5 * e[2], zorder=1, alpha=1)
         else:
             ax[0].plot([x[e[0]], x[e[1]]], [y[e[0]], y[e[1]]], color='k', linewidth=2.5 * e[2], zorder=1)
     for k in range(cluster.size):
@@ -95,7 +97,7 @@ def plot_heatmap():
 def plot_freq():
     x = np.arange(1, len(param['frequency']) + 1, 1)
     ax[2].bar(x, param['frequency'], tick_label=x)
-    ax[2].tick_params(labelsize=10)
+    ax[2].tick_params(labelsize=8)
 
 if __name__ == '__main__':
     #plt.rcParams['ps.useafm'] = True

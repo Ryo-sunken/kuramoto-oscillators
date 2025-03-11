@@ -44,7 +44,7 @@ def f_inter_k_EEP(psi, k):
     return 2 * D_max[k] * psi + epsilon[k]
 
 def f_inter_k(psi, k):
-    return np.minimum(2 * D_max[k], f_inter_k_EEP(psi, k))
+    return np.minimum(2 * D_max[k], f_inter_k_EEP(psi, k)) + del_freq[k]
 
 def f_input_k(psi, k):
     return -g_max[k] * np.sin(psi) + 2 * (g_max[k] - g_min[k])
@@ -82,7 +82,13 @@ for k in range(0, 3):
     
 psi = np.arange(0, np.pi, 0.01)
 
-plt.plot(psi, -(f_intra_k(psi, int(args[4])) + f_input_k(psi, int(args[4]))))
-plt.plot(psi, f_inter_k(psi, int(args[4])))
+#plt.plot(psi, -(f_intra_k(psi, int(args[4])) + f_input_k(psi, int(args[4]))))
+#plt.plot(psi, f_inter_k(psi, int(args[4])))
+
+fig, ax = plt.subplots()
+fig.set_figwidth(6)
+fig.set_figheight(6)
+ax.plot(psi, f_inter_k(psi, int(args[4])))
+ax.grid()
 
 plt.show()

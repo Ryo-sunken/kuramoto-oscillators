@@ -15,7 +15,7 @@ def parse_arguments():
     parser.add_argument('control_file_name', help='制御パラメータが入っているファイル名')
     parser.add_argument('file_number',       type=int,                                                                                               help='何番目のファイルを読み込むか')
     parser.add_argument('--lim',             required=False, type=float, nargs=2,                default=[0, 5],                                     help='時間軸の範囲')
-    parser.add_argument('--style',           required=False, choices=['wave', 'order', 'phase', 'max'], default='max',                                     help='結果の描画形式')
+    parser.add_argument('--style',           required=False, choices=['wave', 'order', 'phase', 'max', 'omega'], default='max',                                     help='結果の描画形式')
 
     return parser.parse_args()
 
@@ -33,11 +33,11 @@ def load_result(network_param):
 
 def create_fig():
     fig, ax = plt.subplots()
-    fig.set_figwidth(10)
+    fig.set_figwidth(8)
     fig.set_figheight(5)
-    fsize = 22
+    fsize = 32
     cmap = plt.get_cmap('tab10')
-    ax.set_xticks(np.arange(0.0, 50.5, 1.0))
+    ax.set_xticks(np.arange(0.0, 101.0, 1.0))
 
     if args.style == 'wave':
         k = 0
@@ -67,9 +67,39 @@ def create_fig():
 
             idx_sum += param['cluster_nodes_num'][k]
 
-        ax.set_ylim(0.9, 1.01)
-        ax.set_yticks([-1.0, -0.5, 0.0, 0.5, 1.0])
-        ax.set_ylabel(r'$r$', fontsize=fsize)
+        data = []
+        for i in range(0, 20):
+            data.append(result['phase' + str(i + 1)])
+        data = np.array(data)
+        order_data = np.sqrt(np.power(np.sum(np.cos(data), 0), 2) + np.power(np.sum(np.sin(data), 0), 2)) / 20
+        ax.plot(t, order_data, linewidth=1.2, color=cmap(3), label='Cluster1+2')
+
+        data = []
+        for i in range(10, 30):
+            data.append(result['phase' + str(i + 1)])
+        data = np.array(data)
+        order_data  = np.sqrt(np.power(np.sum(np.cos(data), 0), 2) + np.power(np.sum(np.sin(data), 0), 2)) / 20
+        ax.plot(t, order_data, linewidth=1.2, color=cmap(4), label='Cluster2+3')
+        
+        data = []
+        for i in range(0, 10):
+            data.append(result['phase' + str(i + 1)])
+        for i in range(20, 30):
+            data.append(result['phase' + str(i + 1)])
+        data = np.array(data)
+        order_data = np.sqrt(np.power(np.sum(np.cos(data), 0), 2) + np.power(np.sum(np.sin(data), 0), 2)) / 20
+        ax.plot(t, order_data, linewidth=1.2, color=cmap(5), label='Cluster1+3')
+
+        data = []
+        for i in range(0, 30):
+            data.append(result['phase' + str(i + 1)])
+        data = np.array(data)
+        order_data = np.sqrt(np.power(np.sum(np.cos(data), 0), 2) + np.power(np.sum(np.sin(data), 0), 2)) / 30
+        ax.plot(t, order_data, linewidth=1.2, color=cmap(6), label='All')
+
+        ax.set_ylim(0.0, 1.01)
+        #ax.set_yticks([-1.0, -0.5, 0.0, 0.5, 1.0])
+        ax.set_ylabel('Order parameter', fontsize=fsize)
     elif args.style == 'phase':
         k = 0
         idx_sum = 0
@@ -83,6 +113,19 @@ def create_fig():
         ax.set_ylim(0, 2*np.pi)
         ax.set_yticks([0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
         ax.set_ylabel(r'$\theta$', fontsize=fsize)
+    elif args.style == 'omega':
+        k = 0
+        idx_sum = 0
+        for i in range(param['state_dim']):
+            omega = (np.array(result['phase'+str(i+1)][1:]) - np.array(result['phase'+str(i+1)][:-1])) / 0.001
+            if i+1 == idx_sum + param['cluster_nodes_num'][k]:
+                ax.plot(t[1:], omega, linewidth=1, color=cmap(k), label='Cluster'+str(k+1))
+                idx_sum += param['cluster_nodes_num'][k]
+                k += 1
+            else:
+                ax.plot(t[1:], omega, linewidth=1, color=cmap(k))
+        ax.set_ylim(0, 20)
+        ax.set_yticks([0.0, 5.0, 10.0, 15.0, 20.0])
     elif args.style == 'max':
         idx_sum = 0
         for k in range(len(param['cluster_nodes_num'])):
@@ -104,25 +147,28 @@ def create_fig():
                     if phase_diff[i, j] > np.pi:
                         phase_diff[i, j] = 2 * np.pi - phase_diff[i, j]
             max_data = np.max(phase_diff, axis=0)
-            ax.plot(t, max_data, linewidth=1.2, color=cmap(k), label='Cluster' + str(k+1))
+            ax.plot(t, max_data, linewidth=3, color=cmap(k), label='Cluster' + str(k+1))
             idx_sum += param['cluster_nodes_num'][k]
 
+        ax.plot(t, [np.pi / 4 for i in t], color=cmap(3), linewidth=3, linestyle='dashdot', label=r'$\underline{\psi}_k = \pi / 4$')
         ax.set_ylim(0, np.pi)
         ax.set_yticks([0, 1.0, 2.0, 3.0])
-        ax.set_ylabel(r'Max phase difference', fontsize=fsize)
+        #ax.set_ylabel(r'Max phase difference', fontsize=fsize)
+        ax.legend(fontsize=fsize-6, loc='upper right', framealpha=1, bbox_to_anchor=(1, 1), borderaxespad=0, ncol=2)
 
 
     ax.set_xlim(args.lim[0], args.lim[1])
-    ax.set_xlabel('Time $t$', fontsize=fsize)
+    #ax.set_xlabel('Time $t$', fontsize=fsize)
     ax.tick_params(axis='both', labelsize=fsize)
-    ax.legend(fontsize=fsize, loc='lower right', framealpha=1)
+    #ax.legend(fontsize=fsize-4, loc='lower right', framealpha=1, bbox_to_anchor=(1, 1), borderaxespad=1, ncol=3)
+    ax.grid()
 
     plt.tight_layout()
 
 if __name__ == '__main__':
     #plt.rcParams['ps.useafm'] = True
     #plt.rcParams['pdf.use14corefonts'] = True
-    #plt.rcParams['text.usetex'] = True
+    plt.rcParams['text.usetex'] = True
 
     args   = parse_arguments()
     param  = load_network_param()
@@ -131,4 +177,5 @@ if __name__ == '__main__':
 
     create_fig()
 
+    plt.tight_layout()
     plt.show()
